@@ -41,6 +41,7 @@ dp = Dispatcher()
 class SurveyStates(StatesGroup):
     start_question = State()
     full_name = State()
+    age = State()
     phone = State()
     goal = State()
     goal_other = State()
@@ -212,6 +213,7 @@ def get_answers_dict() -> Dict:
         "username": None,
         "first_name": None,
         "full_name": "",
+        "age": "",
         "phone": "",
         "goal": "",
         "goal_other": "",
@@ -244,6 +246,7 @@ def save_to_excel(answers: Dict):
         answers.get("username"),
         answers.get("first_name"),
         answers.get("full_name"),
+        answers.get("age"),
         answers.get("phone"),
         answers.get("goal"),
         answers.get("goal_other"),
@@ -270,7 +273,7 @@ def save_to_excel(answers: Dict):
         answers.get("timestamp"),
     ]
     headers = [
-        "user_id", "username", "first_name", "full_name", "phone",
+        "user_id", "username", "first_name", "full_name", "age", "phone",
         "goal", "goal_other", "current_format", "desired_format",
         "frequency", "weekdays", "time_slots", "morning_intervals",
         "afternoon_intervals", "evening_intervals", "unavailable_time",
@@ -308,8 +311,11 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.update_data(answers=answers)
     text = """
 🎓 Начинаем новый учебный год в Lingva Family!
-Привет! ❤️ Мы очень рады, что вы с нами!
+
+Приветствуем! ❤️ Мы очень рады, что вы с нами!
+
 Впереди новый учебный год - будем учиться, двигаться к своим целям, видеть результат и получать удовольствие от занятий ✨
+
 Мы уже составляем расписание и хотим учесть ваши планы и пожелания.
 Если вам нужно поменять дни или время занятий, попробовать другой формат или у вас появилась новая цель - расскажите нам об этом.
 Ответьте, пожалуйста, на несколько коротких вопросов. Так мы сможем сделать новый учебный год удобным и комфортным для вас ❤️
@@ -344,6 +350,14 @@ async def process_full_name(message: Message, state: FSMContext):
     data = await state.get_data()
     answers = data["answers"]
     answers["full_name"] = message.text.strip()
+    await state.update_data(answers=answers)
+    await message.answer("Укажите возраст студента.")
+
+@dp.message(SurveyStates.age)
+async def process_age(message: Message, state: FSMContext):
+    data = await state.get_data()
+    answers = data["answers"]
+    answers["age"] = message.text.strip()
     await state.update_data(answers=answers)
     await message.answer("Напишите ваш номер телефона.")
     await state.set_state(SurveyStates.phone)
