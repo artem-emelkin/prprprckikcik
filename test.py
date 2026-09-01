@@ -352,6 +352,7 @@ async def process_full_name(message: Message, state: FSMContext):
     answers["full_name"] = message.text.strip()
     await state.update_data(answers=answers)
     await message.answer("Укажите возраст студента.")
+    await state.set_state(SurveyStates.age)
 
 @dp.message(SurveyStates.age)
 async def process_age(message: Message, state: FSMContext):
