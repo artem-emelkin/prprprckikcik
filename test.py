@@ -272,6 +272,7 @@ def save_to_excel(answers: Dict):
         answers.get("rules_confirmed"),
         answers.get("timestamp"),
     ]
+
     headers = [
         "user_id", "username", "first_name", "full_name", "age", "phone",
         "goal", "goal_other", "current_format", "desired_format",
@@ -282,21 +283,26 @@ def save_to_excel(answers: Dict):
         "schedule_flexibility", "wishes", "need_manager",
         "review_choice", "rules_confirmed", "timestamp"
     ]
+
     try:
-        try:
+        if os.path.exists(EXCEL_FILENAME):
             wb = openpyxl.load_workbook(EXCEL_FILENAME)
             ws = wb.active
-        except FileNotFoundError:
+        else:
             wb = Workbook()
             ws = wb.active
             ws.append(headers)
+
         ws.append(row_data)
         wb.save(EXCEL_FILENAME)
-        logger.info(f"Ответы сохранены для user_id={answers.get('user_id')}")
-    except PermissionError:
-        logger.error(f"Файл {EXCEL_FILENAME} заблокирован! Записываем во временный файл.")
-        temp_filename = f"survey_results_temp_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        wb.save(temp_filename)
+
+        logger.info(
+            f"Ответы сохранены для user_id={answers.get('user_id')}"
+        )
+
+    except Exception as e:
+        logger.exception(f"Ошибка при сохранении Excel: {e}")
+        raise
 
 # ------------------- ХЭНДЛЕРЫ -------------------
 
